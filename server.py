@@ -51,43 +51,44 @@ async def detect(image: UploadFile = File(...)):
     b64 = base64.b64encode(img_bytes).decode()
     run_on_octavia(f"echo '{b64}' | base64 -d > /tmp/detect_input.jpg")
 
-    # Run inference using hailortcli with YOLOv5
+    # Run inference on Octavia using Hailo-8 Python API (4.23.0)
+    # Output format: list[batch][class_id] = ndarray(N, 5) where cols = [y_min, x_min, y_max, x_max, score]
     script = f"""python3 -c "
 import numpy as np
-from hailo_platform import VDevice, HailoStreamInterface, ConfigureParams, InferVStreams, InputVStreamParams, OutputVStreamParams, FormatType
+from hailo_platform import HEF, VDevice, InferVStreams, InputVStreamParams, OutputVStreamParams, FormatType
 from PIL import Image
 import json, time
 
-img = Image.open('/tmp/detect_input.jpg').resize((640, 640))
-arr = np.array(img).astype(np.float32) / 255.0
-arr = np.expand_dims(arr, 0)
+img = Image.open('/tmp/detect_input.jpg').convert('RGB').resize((640, 640))
+arr = np.expand_dims(np.array(img, dtype=np.uint8), 0)
 
-params = VDevice.create_params()
-vdevice = VDevice(params)
-hef = vdevice.create_hef('{YOLO_HEF}')
+hef = HEF('{YOLO_HEF}')
+vdevice = VDevice()
 net_group = vdevice.configure(hef)[0]
-
-inp_params = InputVStreamParams.make(net_group, quantized=False, format_type=FormatType.FLOAT32)
-out_params = OutputVStreamParams.make(net_group, quantized=False, format_type=FormatType.FLOAT32)
+info_in = net_group.get_input_vstream_infos()[0]
+inp_params = InputVStreamParams.make(net_group, format_type=FormatType.UINT8)
+out_params = OutputVStreamParams.make(net_group, format_type=FormatType.FLOAT32)
 
 t = time.time()
-with InferVStreams(net_group, inp_params, out_params) as pipeline:
-    results = pipeline.infer({{pipeline.get_input_vstream_infos()[0].name: arr}})
+net_group_params = net_group.create_params()
+with net_group.activate(net_group_params):
+    with InferVStreams(net_group, inp_params, out_params) as pipeline:
+        results = pipeline.infer({{info_in.name: arr}})
 ms = int((time.time()-t)*1000)
 
-# Parse detections
-output_name = list(results.keys())[0]
-detections = results[output_name][0]
+# NMS output: list[batch][class_id] = ndarray(N, 5) [y1,x1,y2,x2,score]
+output = list(results.values())[0]
+batch0 = output[0]  # 80 classes
 objects = []
-for det in detections:
-    if len(det) >= 6:
-        conf = float(det[4])
-        if conf > 0.3:
-            cls = int(det[5]) if len(det) > 5 else 0
-            objects.append({{'label': cls, 'confidence': round(conf, 3), 'bbox': [float(d) for d in det[:4]]}})
+for cls_id, dets in enumerate(batch0):
+    for det in dets:
+        score = float(det[4])
+        if score > 0.3:
+            objects.append({{'label': cls_id, 'confidence': round(score, 3), 'bbox': [round(float(d), 4) for d in det[:4]]}})
 
+objects.sort(key=lambda x: x['confidence'], reverse=True)
 print(json.dumps({{'objects': objects[:20], 'inference_ms': ms}}))
-" 2>/dev/null || echo '{{"objects":[],"inference_ms":0,"error":"inference failed"}}'
+" 2>&1 || echo '{{"objects":[],"inference_ms":0,"error":"inference failed"}}'
 """
     out, err, rc = run_on_octavia(script, timeout=60)
 
