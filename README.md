@@ -1,51 +1,41 @@
-# Hailo Vision
+<div align="center">
 
-[![CI](https://github.com/blackboxprogramming/hailo-vision/actions/workflows/ci.yml/badge.svg)](https://github.com/blackboxprogramming/hailo-vision/actions/workflows/ci.yml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB.svg)](https://python.org)
-[![Hailo-8](https://img.shields.io/badge/Hailo--8-26_TOPS-FF6B2B.svg)](https://hailo.ai)
-[![YOLOv5](https://img.shields.io/badge/YOLOv5-detection-00D4FF.svg)](https://ultralytics.com)
-[![Edge AI](https://img.shields.io/badge/edge-real_time-CC00AA.svg)](https://blackroad.io)
+<img src="https://images.blackroad.io/pixel-art/road-logo.png" alt="BlackRoad OS" width="80" />
 
+# hailo-vision
 
+**Hailo Vision — Real-time computer vision on Hailo-8 AI accelerators (26 TOPS). YOLOv5 object detection, video analytics, and edge inference pipelines on Raspberry Pi 5.**
 
-Computer vision inference on Hailo-8 AI accelerators (26 TOPS each). Runs YOLOv5 object detection on Raspberry Pi 5 edge hardware via the Hailo Platform SDK 4.23.0.
+[![BlackRoad OS](https://img.shields.io/badge/BlackRoad_OS-Pave_Tomorrow-FF2255?style=for-the-badge&labelColor=000000)](https://blackroad.io)
+[![License](https://img.shields.io/badge/License-Proprietary-FF6B2B?style=for-the-badge&labelColor=000000)](./LICENSE)
+[![Edge AI](https://img.shields.io/badge/Edge_AI-52_TOPS-00D4FF?style=for-the-badge&labelColor=000000)](https://github.com/BlackRoad-OS-Inc)
 
-## Hardware
+</div>
 
-- **2x Hailo-8** accelerators (52 TOPS total)
-- Octavia (Pi 5) — primary inference node
-- Cecilia (Pi 5) — secondary
+<div align="center">
+<sub>Part of the <a href="https://blackroad.io">BlackRoad OS</a> ecosystem — sovereign edge AI infrastructure</sub>
+</div>
 
-## API
+---
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Upload UI |
-| `/health` | GET | Hailo device status |
-| `/detect` | POST | Upload image, get YOLOv5 detections (multipart/form-data) |
+## Overview
 
-## Detection Response
+Hailo Vision — Real-time computer vision on Hailo-8 AI accelerators (26 TOPS). YOLOv5 object detection, video analytics, and edge inference pipelines on Raspberry Pi 5.
 
-```json
-{
-  "objects": [{"label": "person", "confidence": 0.95, "bbox": [0.1, 0.2, 0.8, 0.9]}],
-  "inference_ms": 12,
-  "total_ms": 450,
-  "device": "Hailo-8 (26 TOPS)",
-  "model": "yolov5s"
-}
-```
+## License
 
-## Run
+**Proprietary** — Copyright © 2024–2026 [BlackRoad OS, Inc.](https://blackroad.io) All rights reserved.
 
-```bash
-pip install -r requirements.txt
-python server.py  # http://localhost:8200
-```
+Founder & CEO: **Alexa Louise Amundson** · Delaware C-Corp
 
-## Test
+See [LICENSE](./LICENSE) for full terms.
 
-```bash
-pip install pytest
-pytest tests/
-```
+---
+
+<div align="center">
+
+**BlackRoad OS — Pave Tomorrow.**
+
+[blackroad.io](https://blackroad.io) · [GitHub](https://github.com/BlackRoad-OS-Inc) · [Brand](https://brand.blackroad.io)
+
+</div>
