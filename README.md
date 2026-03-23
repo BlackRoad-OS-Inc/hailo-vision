@@ -1,5 +1,13 @@
 # hailo-vision
 
+> Hailo Vision — real-time computer vision on Hailo-8 accelerators (26 TOPS per chip) on Raspberry Pi 5 (BlackRoad integration)
+
+Part of the [BlackRoad OS](https://blackroad.io) ecosystem — [BlackRoad-OS-Inc](https://github.com/BlackRoad-OS-Inc)
+
+---
+
+# hailo-vision
+
 Hailo Vision — real-time computer vision on Hailo-8 accelerators (26 TOPS per chip) on Raspberry Pi 5 (BlackRoad integration)
 
 **BlackRoad-OS-Inc** — Corporate root — all IP and governance
